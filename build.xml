@@ -3,16 +3,15 @@
 <project name="your-project" default="metrics" basedir=".">
     <property environment="env"/>
 
+    <property name="src-folder" value="${basedir}/src" />
+    <property name="build-folder" value="${basedir}/build" />
+    <property name="phpunit-config-folder" value="${basedir}/app" />
+
     <target name="metrics"
             depends="prepare,phploc,pdepend,phpmd-ci,phpcs-ci,phpcpd,phpcb"/>
 
     <target name="metrics-parallel"
             depends="prepare,tools-parallel,phpcb"/>
-
-    <target name="symfony-init"
-            depends="vendors,clear-cache">
-        <copy file="./app/config/parameters.yml.jenkins" tofile="./app/config/parameters.yml" />
-    </target>
 
     <target name="tools-parallel" description="Run tools in parallel">
         <parallel threadCount="2">
@@ -28,27 +27,27 @@
     </target>
 
     <target name="clean" description="Cleanup build artifacts">
-        <delete dir="${basedir}/build/api"/>
-        <delete dir="${basedir}/build/code-browser"/>
-        <delete dir="${basedir}/build/coverage"/>
-        <delete dir="${basedir}/build/logs"/>
-        <delete dir="${basedir}/build/pdepend"/>
+        <delete dir="${build-folder}/api"/>
+        <delete dir="${build-folder}/code-browser"/>
+        <delete dir="${build-folder}/coverage"/>
+        <delete dir="${build-folder}/logs"/>
+        <delete dir="${build-folder}/pdepend"/>
     </target>
     
     <target name="prepare" description="Prepares tests">
-        <mkdir dir="${basedir}/build/api"/>
-        <mkdir dir="${basedir}/build/code-browser"/>
-        <mkdir dir="${basedir}/build/coverage"/>
-        <mkdir dir="${basedir}/build/logs"/>
-        <mkdir dir="${basedir}/build/pdepend"/>
-        <mkdir dir="${basedir}/build/phpdox"/>
+        <mkdir dir="${build-folder}/api"/>
+        <mkdir dir="${build-folder}/code-browser"/>
+        <mkdir dir="${build-folder}/coverage"/>
+        <mkdir dir="${build-folder}/logs"/>
+        <mkdir dir="${build-folder}/pdepend"/>
+        <mkdir dir="${build-folder}/phpdox"/>
     </target>
 
     <target name="lint" description="Perform syntax check of sourcecode files">
         <apply executable="php" failonerror="true">
             <arg value="-l" />
 
-            <fileset dir="${basedir}/src">
+            <fileset dir="${src-folder}">
                 <include name="**/*.php" />
                 <modified />
             </fileset>
@@ -63,61 +62,61 @@
     <target name="phploc" description="Measure project size using PHPLOC">
         <exec executable="phploc">
             <arg value="--log-csv" />
-            <arg value="${basedir}/build/logs/phploc.csv" />
-            <arg path="${basedir}/src" />
+            <arg value="${build-folder}/logs/phploc.csv" />
+            <arg path="${src-folder}" />
         </exec>
     </target>
 
     <target name="pdepend" description="Calculate software metrics using PHP_Depend">
         <exec executable="pdepend">
-            <arg value="--jdepend-xml=${basedir}/build/logs/jdepend.xml" />
-            <arg value="--jdepend-chart=${basedir}/build/pdepend/dependencies.svg" />
-            <arg value="--overview-pyramid=${basedir}/build/pdepend/overview-pyramid.svg" />
-            <arg path="${basedir}/src" />
+            <arg value="--jdepend-xml=${build-folder}/logs/jdepend.xml" />
+            <arg value="--jdepend-chart=${build-folder}/pdepend/dependencies.svg" />
+            <arg value="--overview-pyramid=${build-folder}/pdepend/overview-pyramid.svg" />
+            <arg path="${src-folder}" />
         </exec>
     </target>
 
     <target name="phpmd"
             description="Perform project mess detection using PHPMD and print human readable output. Intended for usage on the command line before committing.">
         <exec executable="phpmd">
-            <arg path="${basedir}/src" />
+            <arg path="${src-folder}" />
             <arg value="text" />
-            <arg value="${basedir}/build/phpmd.xml" />
+            <arg value="${build-folder}/phpmd.xml" />
         </exec>
     </target>
 
     <target name="phpmd-ci" description="Perform project mess detection using PHPMD creating a log file for the continuous integration server">
         <exec executable="phpmd">
-            <arg path="${basedir}/src" />
+            <arg path="${src-folder}" />
             <arg value="xml" />
-            <arg value="${basedir}/build/phpmd.xml" />
+            <arg value="${build-folder}/phpmd.xml" />
             <arg value="--reportfile" />
-            <arg value="${basedir}/build/logs/pmd.xml" />
+            <arg value="${build-folder}/logs/pmd.xml" />
         </exec>
     </target>
 
     <target name="phpcs"
             description="Find coding standard violations using PHP_CodeSniffer and print human readable output. Intended for usage on the command line before committing.">
         <exec executable="phpcs">
-            <arg value="--standard=${basedir}/build/phpcs.xml" />
-            <arg path="${basedir}/src" />
+            <arg value="--standard=${build-folder}/phpcs.xml" />
+            <arg path="${src-folder}" />
         </exec>
     </target>
 
     <target name="phpcs-ci" description="Find coding standard violations using PHP_CodeSniffer creating a log file for the continuous integration server">
         <exec executable="phpcs" output="/dev/null">
             <arg value="--report=checkstyle" />
-            <arg value="--report-file=${basedir}/build/logs/checkstyle.xml" />
-            <arg value="--standard=${basedir}/build/psr-2.xml" />
-            <arg path="${basedir}/src" />
+            <arg value="--report-file=${build-folder}/logs/checkstyle.xml" />
+            <arg value="--standard=${build-folder}/psr-2.xml" />
+            <arg path="${src-folder}" />
         </exec>
     </target>
 
     <target name="phpcpd" description="Find duplicate code using PHPCPD">
         <exec executable="phpcpd">
             <arg value="--log-pmd" />
-            <arg value="${basedir}/build/logs/pmd-cpd.xml" />
-            <arg path="${basedir}/src" />
+            <arg value="${build-folder}/logs/pmd-cpd.xml" />
+            <arg path="${src-folder}" />
         </exec>
     </target>
 
@@ -128,21 +127,21 @@
     <target name="phpcb" description="Aggregate tool output with PHP_CodeBrowser">
         <exec executable="phpcb">
             <arg value="--log" />
-            <arg path="${basedir}/build/logs" />
+            <arg path="${build-folder}/logs" />
             <arg value="--source" />
-            <arg path="${basedir}/src" />
+            <arg path="${src-folder}" />
             <arg value="--output" />
-            <arg path="${basedir}/build/code-browser" />
+            <arg path="${build-folder}/code-browser" />
         </exec>
     </target>
  
     <target name="vendors" depends="prepare" description="Install dependencies">
-        <exec executable="rm" failonerror="true">
-            <arg line="-rf vendor" />
+        <exec executable="rm" failonerror="false">
+            <arg line="-rf ./vendor" />
         </exec>
 
         <exec executable="rm" failonerror="false">
-            <arg value="app/bootstrap.php.cache" />
+            <arg value="./app/bootstrap.php.cache" />
         </exec>
 
         <exec executable="rm" failonerror="false">
@@ -163,20 +162,25 @@
     <target name="clear-cache" depends="vendors" description="Clear cache">
         <exec executable="rm" failonerror="true">
             <arg value="-rf" />
-            <arg value="app/cache/*" />
+            <arg value="./app/cache/*" />
         </exec>
         <exec executable="php" failonerror="true">
-            <arg line="app/console cache:warmup --env=test" />
+            <arg line="./app/console cache:warmup --env=test" />
         </exec>
+    </target>
+
+    <target name="symfony-init"
+            depends="vendors,clear-cache">
+        <copy file="./app/config/parameters.yml.jenkins" tofile="./app/config/parameters.yml" />
     </target>
 
     <target name="phpunit"
             depends="prepare"
             description="Run unit tests using PHPUnit and generates junit.xml and clover.xml">
         <exec executable="phpunit" failonerror="true">
-            <arg line="-c app --coverage-clover build/logs/clover.xml
-                        --coverage-html build/coverage
-                        --log-junit build/logs/junit.xml" />
+            <arg line="-c ${phpunit-config-folder} --coverage-clover ${build-folder}/logs/clover.xml
+                        --coverage-html ${build-folder}/coverage
+                        --log-junit ${build-folder}/logs/junit.xml" />
         </exec>
     </target>
 
@@ -190,8 +194,7 @@
             depends="init-node"
             description="Run unit tests using jasmine-node and generates reports/TEST-[spec name].xml based on spec">
         <exec executable="./node_modules/jasmine-node/bin/jasmine-node" failonerror="true">
-            <arg line="src/OY/MainBundle/Tests/spec --coffee --junitreport" />
-            <arg line="src/OY/UserBundle/Tests/spec --coffee --junitreport" />
+            <arg line="/path/to/jasmin/tests/spec --coffee --junitreport" />
         </exec>
     </target>
 </project>
