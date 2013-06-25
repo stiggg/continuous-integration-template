@@ -1,0 +1,16 @@
+{
+    "name": "stiggg/continuous-integration-template",
+    "type": "library",
+    "description": "Jenkins template for PHP projects",
+    "require": {
+    },
+    "authors": [
+        {
+            "name": "Sami Tikka",
+            "email": "sami.tikka@gmail.com"
+        }
+    ],
+    "license": "MIT",
+    "autoload": {
+    }
+}
