@@ -33,7 +33,7 @@
         <delete dir="${build-folder}/logs"/>
         <delete dir="${build-folder}/pdepend"/>
     </target>
-    
+
     <target name="prepare" description="Prepares tests">
         <mkdir dir="${build-folder}/api"/>
         <mkdir dir="${build-folder}/code-browser"/>
@@ -43,7 +43,7 @@
         <mkdir dir="${build-folder}/phpdox"/>
     </target>
 
-    <target name="lint" description="Perform syntax check of sourcecode files">
+    <target name="lint" depends="prepare" description="Perform syntax check of sourcecode files">
         <apply executable="php" failonerror="true">
             <arg value="-l" />
 
@@ -59,7 +59,7 @@
         </apply>
     </target>
 
-    <target name="phploc" description="Measure project size using PHPLOC">
+    <target name="phploc" depends="prepare" description="Measure project size using PHPLOC">
         <exec executable="phploc">
             <arg value="--log-csv" />
             <arg value="${build-folder}/logs/phploc.csv" />
@@ -76,7 +76,7 @@
         </exec>
     </target>
 
-    <target name="phpmd"
+    <target name="phpmd" depends="prepare"
             description="Perform project mess detection using PHPMD and print human readable output. Intended for usage on the command line before committing.">
         <exec executable="phpmd">
             <arg path="${src-folder}" />
@@ -95,10 +95,10 @@
         </exec>
     </target>
 
-    <target name="phpcs"
+    <target name="phpcs" depends="prepare"
             description="Find coding standard violations using PHP_CodeSniffer and print human readable output. Intended for usage on the command line before committing.">
         <exec executable="phpcs">
-            <arg value="--standard=${build-folder}/phpcs.xml" />
+            <arg value="--standard=PSR2" />
             <arg path="${src-folder}" />
         </exec>
     </target>
@@ -107,12 +107,12 @@
         <exec executable="phpcs" output="/dev/null">
             <arg value="--report=checkstyle" />
             <arg value="--report-file=${build-folder}/logs/checkstyle.xml" />
-            <arg value="--standard=${build-folder}/psr-2.xml" />
+            <arg value="--standard=PSR2" />
             <arg path="${src-folder}" />
         </exec>
     </target>
 
-    <target name="phpcpd" description="Find duplicate code using PHPCPD">
+    <target name="phpcpd" depends="prepare" description="Find duplicate code using PHPCPD">
         <exec executable="phpcpd">
             <arg value="--log-pmd" />
             <arg value="${build-folder}/logs/pmd-cpd.xml" />
@@ -134,7 +134,7 @@
             <arg path="${build-folder}/code-browser" />
         </exec>
     </target>
- 
+
     <target name="vendors" depends="prepare" description="Install dependencies">
         <exec executable="rm" failonerror="false">
             <arg line="-rf ./vendor" />
